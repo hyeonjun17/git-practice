@@ -3,5 +3,5 @@ on: push
 jobs:
   run:
     runs-on: ubuntu-latest
-      steps:
-        - run: echo "YAML Syntax error"
+    steps:
+      - run: echo "YAML Syntax error"
