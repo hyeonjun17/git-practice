@@ -1,5 +1,4 @@
-name: Shell Command # 워크플로 ID
-# event trigger
+name: Shell Command
 on: workflow_dispatch
  jobs: # task 단위
 	run: # job ID, 사용자 임의로 작성 가능
