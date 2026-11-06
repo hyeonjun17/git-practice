@@ -1,11 +1,11 @@
 name: Shell Command
 on: workflow_dispatch
- jobs: # task 단위
-	run: # job ID, 사용자 임의로 작성 가능
-		runs-on: ubuntu-latest # 실행 환경
-		steps: # 실행 최소 단위
-			- name: Check environment # step1의 ID
-				run: | # 여러 shell command 실행
+ jobs:
+	run:
+		runs-on: ubuntu-latest
+		steps:
+			- name: Check environment
+				run: |
 					echo "Current directory:"
 					pwd
 					echo "File list:"
