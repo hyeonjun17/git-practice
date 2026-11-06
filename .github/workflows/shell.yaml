@@ -1,5 +1,6 @@
 name: Shell Command # 워크플로 ID
-on: workflow_dispatch # event trigger
+# event trigger
+on: workflow_dispatch
  jobs: # task 단위
 	run: # job ID, 사용자 임의로 작성 가능
 		runs-on: ubuntu-latest # 실행 환경
