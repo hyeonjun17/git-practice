@@ -1,0 +1,73 @@
+name: OrderLab CI-CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "orderlab-project/**"
+      - ".github/workflows/ci-cd.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "orderlab-project/**"
+      - ".github/workflows/ci-cd.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: orderlab-project
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - run: python -m pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: python -m pytest -q
+      - name: Check Pages publishing source
+        id: pages
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          has_pages=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.has_pages')
+          enabled=false
+          if [ "$has_pages" = true ]; then
+            enabled=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.build_type == "workflow"')
+          fi
+          echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    if: github.event_name == 'push' && needs.quality.outputs.pages_enabled == 'true'
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - run: python generate_report.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: orderlab-project/site
+      - id: deployment
+        uses: actions/deploy-pages@v4
